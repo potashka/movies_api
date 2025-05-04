@@ -41,7 +41,7 @@
 
 
 ## Структура:
-
+```
 movies_api/
 ├── .env.example
 ├── docker-compose.yml
@@ -68,5 +68,5 @@ movies_api/
         ├── film.py
         ├── genre.py
         └── person.py
-
+```
 
