@@ -7,6 +7,7 @@ class ShortFilm(BaseModel):
     title: str
     imdb_rating: Optional[float] = None
 
+
 class Film(BaseModel):
     uuid: str = Field(alias="id")
     title: str

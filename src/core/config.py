@@ -1,7 +1,7 @@
 import os
 from logging import config as logging_config
 
-from logger import LOGGING
+from .logger import LOGGING
 
 logging_config.dictConfig(LOGGING)
 
@@ -22,3 +22,6 @@ PG_PORT     = int(os.getenv('PG_PORT', 5432))
 PG_DB       = os.getenv('PG_DB', 'movies_db')
 PG_USER     = os.getenv('PG_USER', 'app')
 PG_PASSWORD = os.getenv('PG_PASSWORD', 'secret')
+
+# Режим без внешних сервисов (по умолчанию False)
+DOCS_ONLY = os.getenv("DOCS_ONLY", "false").lower() == "true"

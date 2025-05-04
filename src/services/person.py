@@ -7,8 +7,8 @@ from fastapi import Depends, HTTPException
 from redis.asyncio import Redis
 
 from src.db.elastic import get_elastic
-from db.redis import get_redis
-from models.person import Person
+from src.db.redis import get_redis
+from src.models.person import Person
 
 CACHE_TTL = 60 * 5
 INDEX = "persons"

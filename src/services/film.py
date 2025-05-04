@@ -13,6 +13,7 @@ from src.models.film import Film, ShortFilm
 CACHE_TTL = 60 * 5  # seconds
 INDEX = "movies"
 
+
 class FilmService:
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
         self.redis = redis
@@ -62,6 +63,7 @@ class FilmService:
         }
         resp = await self.elastic.search(index=INDEX, body=body)
         return [ShortFilm(**hit["_source"]) for hit in resp["hits"]["hits"]]
+
 
 @lru_cache()
 def get_film_service(
