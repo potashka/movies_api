@@ -11,4 +11,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ ./src
 
 EXPOSE 8000
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]
+
+# изменено ── запускаемся через gunicorn‑uvicorn
+CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-w", "4", "src.main:app", "--bind", "0.0.0.0:8000"]

@@ -1,8 +1,8 @@
-from typing import Optional
 import psycopg
-from src.core import config
 
-pg: Optional[psycopg.AsyncConnection] = None
+from src.core.config import settings
+
+pg: psycopg.AsyncConnection | None = None  # изменено
 
 
 async def get_pg() -> psycopg.AsyncConnection:
@@ -14,11 +14,11 @@ async def get_pg() -> psycopg.AsyncConnection:
 async def open_pg():
     global pg
     pg = await psycopg.AsyncConnection.connect(
-        host=config.PG_HOST,
-        port=config.PG_PORT,
-        dbname=config.PG_DB,
-        user=config.PG_USER,
-        password=config.PG_PASSWORD,
+        host=settings.pg_host,
+        port=settings.pg_port,
+        dbname=settings.pg_db,
+        user=settings.pg_user,
+        password=settings.pg_password,
     )
 
 

@@ -15,12 +15,19 @@ INDEX = "persons"
 
 
 class PersonService:
+    """Сервис «Персоны».
+
+    Даёт подробные данные по актёрам/режиссёрам/сценаристам,
+    включая список фильмов и ролей.
+    Результаты кэшируются: `person:<uuid>`.
+    """
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
         self.redis = redis
         self.elastic = elastic
 
     async def get_by_id(self, person_id: str) -> Person:
-        cached = await self.redis.get(f"person:{person_id}")
+        key = f"person:{person_id}"                                 # ключ единого формата
+        cached = await self.redis.get(key)
         if cached:
             return Person.model_validate_json(cached)
 
@@ -30,7 +37,7 @@ class PersonService:
             raise HTTPException(HTTPStatus.NOT_FOUND, "person not found")
 
         person = Person(**doc["_source"])
-        await self.redis.set(f"person:{person_id}", person.model_dump_json(), ex=CACHE_TTL)
+        await self.redis.set(key, person.model_dump_json(), ex=CACHE_TTL)
         return person
 
     async def list(self, *, page_size: int, page_number: int) -> List[Person]:

@@ -1,13 +1,9 @@
 """
 Маршруты `/api/v1/films/*`.
-
-Каждый обработчик снабжён подробным docstring‑ом, чтобы Swagger/OpenAPI
-корректно отображал описания параметров и ответов.
 """
-from http import HTTPStatus
 from typing import List
 
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query
 
 from src.models.film import Film, ShortFilm
 from src.services.film import FilmService, get_film_service
@@ -17,8 +13,16 @@ router = APIRouter()
 
 @router.get("/", response_model=List[ShortFilm])
 async def films_list(
-    sort: str | None = Query(None, description="Sort field, prefix '-' for desc"),
-    genre: str | None = Query(None, description="Genre UUID filter"),
+    sort: str | None = Query(
+        None,
+        description="Поле сортировки; префикс «-» = по убыванию",
+        example="-imdb_rating",
+    ),
+    genre: str | None = Query(
+        None,
+        description="Название жанра для фильтра (например «Action»)",
+        example="Fantasy",
+    ),
     page_size: int = Query(50, ge=1, le=100),
     page_number: int = Query(1, ge=1),
     film_service: FilmService = Depends(get_film_service),
@@ -31,7 +35,7 @@ async def films_list(
 
     * Сортировка задаётся параметром ``sort``.  
       Пример: ``?sort=-imdb_rating`` — топ‑фильмы по рейтингу.
-    * Фильтр по жанру — параметр ``genre=<uuid>``.
+    * Фильтр по жанру .
     * Пагинация: ``page_size`` и ``page_number``.
 
     Returns
@@ -46,11 +50,19 @@ async def films_list(
 
 @router.get("/search", response_model=List[ShortFilm])
 async def films_search(
-    query: str,
+    query: str = Query(
+        ...,
+        description=(
+            "Поисковая строка. Полнотекстовый поиск выполняется сразу по "
+            "нескольким полям: название фильма, описание, имена актёров, "
+            "режиссёров и сценаристов (fuzziness = auto)."
+        ),
+        example="Star Wars",
+    ),
     page_size: int = Query(50, ge=1, le=100),
     page_number: int = Query(1, ge=1),
     film_service: FilmService = Depends(get_film_service),
-):
+) -> List[ShortFilm]:
     """
     Полнотекстовый **поиск фильмов**.
 

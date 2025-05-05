@@ -15,12 +15,21 @@ INDEX = "genres"
 
 
 class GenreService:
+    """Сервис «Жанры».
+
+    Предоставляет основные операции:
+    получить жанр по UUID,
+    отфильтровать по имени,
+    отдать весь список с пагинацией.
+    Кэширует каждый жанр в Redis (ключ `genre:<uuid>`).
+    """
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
         self.redis = redis
         self.elastic = elastic
 
     async def get_by_id(self, genre_id: str) -> Genre:
-        cached = await self.redis.get(f"genre:{genre_id}")
+        key = f"genre:{genre_id}"                                    # ключ единого формата
+        cached = await self.redis.get(key)
         if cached:
             return Genre.model_validate_json(cached)
 
@@ -30,7 +39,7 @@ class GenreService:
             raise HTTPException(HTTPStatus.NOT_FOUND, "genre not found")
 
         genre = Genre(**doc["_source"])
-        await self.redis.set(f"genre:{genre_id}", genre.model_dump_json(), ex=CACHE_TTL)
+        await self.redis.set(key, genre.model_dump_json(), ex=CACHE_TTL)
         return genre
 
     async def list(self, *, page_size: int, page_number: int) -> List[Genre]:

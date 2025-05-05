@@ -1,27 +1,47 @@
+# src/core/config.py сокорректирован по итогам review
 import os
 from logging import config as logging_config
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field
 
 from .logger import LOGGING
 
 logging_config.dictConfig(LOGGING)
 
-PROJECT_NAME = os.getenv('PROJECT_NAME', 'movies-api')
 
-# Redis
-REDIS_HOST = os.getenv('REDIS_HOST', '127.0.0.1')
-REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
+class Settings(BaseSettings):                           # добавлено
+    """
+    Конфигурация приложения. Переменные читаются из `.env`
+    и валидируются pydantic‑ом.
+    """
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+    )
 
-# Elasticsearch
-ELASTIC_SCHEMA = os.getenv('ELASTIC_SCHEMA', 'http://')
-ELASTIC_HOST   = os.getenv('ELASTIC_HOST', '127.0.0.1')
-ELASTIC_PORT   = int(os.getenv('ELASTIC_PORT', 9200))
+    # --- приложение ---
+    project_name: str = Field("movies-api", alias="PROJECT_NAME")    # изменено
 
-# Postgres (для тестов/ETL)
-PG_HOST     = os.getenv('PG_HOST', '127.0.0.1')
-PG_PORT     = int(os.getenv('PG_PORT', 5432))
-PG_DB       = os.getenv('PG_DB', 'movies_db')
-PG_USER     = os.getenv('PG_USER', 'app')
-PG_PASSWORD = os.getenv('PG_PASSWORD', 'secret')
+    # --- Redis ---
+    redis_host: str = Field("127.0.0.1", alias="REDIS_HOST")
+    redis_port: int = Field(6379, alias="REDIS_PORT")
 
-# Режим без внешних сервисов (по умолчанию False)
-DOCS_ONLY = os.getenv("DOCS_ONLY", "false").lower() == "true"
+    # --- Elasticsearch ---
+    elastic_schema: str = Field("http://", alias="ELASTIC_SCHEMA")
+    elastic_host: str = Field("127.0.0.1", alias="ELASTIC_HOST")
+    elastic_port: int = Field(9200, alias="ELASTIC_PORT")
+
+    # --- Postgres ---
+    pg_host: str = Field("127.0.0.1", alias="PG_HOST")
+    pg_port: int = Field(5432, alias="PG_PORT")
+    pg_db: str = Field("movies_db", alias="PG_DB")
+    pg_user: str = Field("app", alias="PG_USER")
+    pg_password: str = Field("secret", alias="PG_PASSWORD")
+
+    # --- режим «только документация» ---
+    docs_only: bool = Field(False, alias="DOCS_ONLY")
+
+
+# добавлено
+settings = Settings()
